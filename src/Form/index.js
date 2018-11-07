@@ -1,5 +1,11 @@
+import _ from 'lodash';
+
 import React from 'react';
 import axios from 'axios';
+
+import {InputField, RadioField, SelectField} from '../Fields';
+
+import './styles.css';
 
 class Form extends React.Component {
   constructor(props) {
@@ -9,31 +15,28 @@ class Form extends React.Component {
       form: {
         fields: {
           name: {
-            value: ''
-          },
-          meal: {
-            value: ''
-          },
-          roomType: {
-            value: ''
-          },
-          notes: {
-            value: ''
-          },
-          guests: {
-            value: ''
-          },
-          phone: {
-            value: ''
+            value: '',
+            errors: []
           },
           email: {
-            value: ''
+            value: '',
+            errors: []
+          },
+          meal: {
+            value: '',
+            errors: []
           },
           start: {
-            value: ''
+            value: '',
+            errors: []
           },
           end: {
-            value: ''
+            value: '',
+            errors: []
+          },
+          roomType: {
+            value: '',
+            errors: []
           }
         },
         errors: []
@@ -146,20 +149,6 @@ class Form extends React.Component {
     });
   };
 
-  onPhoneChange = event =>
-    this.setState({
-      form: {
-        ...this.state.form,
-        fields: {
-          ...this.state.form.fields,
-          phone: {
-            ...this.state.form.fields.phone,
-            value: event.target.value
-          }
-        }
-      }
-    });
-
   onMealChange = event => {
     const mealId = event.target.value;
     const {form} = this.state;
@@ -197,63 +186,45 @@ class Form extends React.Component {
     });
   };
 
-  handleNotesChange = event => {
-    const notesValue = event.target.value;
+  handleErrors = errors => {
+    const responseData = errors.response.data;
+
+    let {
+      form: {fields}
+    } = this.state;
+
+    let newFields = {};
+
+    _.mapKeys(responseData, (error, key) => {
+      newFields[key] = {
+        ...fields[key],
+        errors: error
+      };
+    });
 
     this.setState({
       form: {
         ...this.state.form,
         fields: {
           ...this.state.form.fields,
-          notes: {
-            ...this.state.form.fields.notes,
-            value: notesValue
-          }
+          ...newFields
         }
       }
     });
-  };
-
-  onGuestsChange = event => {
-    const guestsValue = event.target.value;
-    const {form} = this.state;
-
-    this.setState({
-      form: {
-        ...form,
-        fields: {
-          ...form.fields,
-          guests: {
-            ...form.fields.guests,
-            value: guestsValue
-          }
-        }
-      }
-    });
-  };
-
-  handleErrors = errors => {
-    // field errors
-    const reponseData = errors.response.data;
-
-    console.log(reponseData);
   };
 
   handleSubmit = () => {
     const {
       form: {
-        fields: {name, meal, email, phone, roomType, notes, guests, start, end}
+        fields: {name, meal, email, roomType, start, end}
       }
     } = this.state;
 
     const data = {
       name: name.value,
       email: email.value,
-      phone: phone.value,
       meal: meal.value,
       roomType: roomType.value,
-      notes: notes.value,
-      numberOfPeople: guests.value,
       start: start.value,
       end: end.value
     };
@@ -309,7 +280,7 @@ class Form extends React.Component {
     const {
       userMessage,
       form: {
-        fields: {name, notes, guests, phone, email, start, end}
+        fields: {name, email, start, end, roomType, meal}
       },
       meals,
       roomTypes,
@@ -318,84 +289,59 @@ class Form extends React.Component {
 
     return (
       <React.Fragment>
-        <form>
-          <label>Name</label>
-          <input
-            type="text"
-            value={name.value}
-            onChange={this.handleNameChange}
-            placeholder="Type your name"
-          />
+        <form className="BookingRequestForm">
+          <div className="nameAndEmail">
+            <InputField
+              type="text"
+              label="Name"
+              value={name.value}
+              onChange={this.handleNameChange}
+              errors={name.errors}
+            />
 
-          <label>Email</label>
-          <input
-            type="email"
-            value={email.value}
-            onChange={this.onEmailChange}
-            placeholder="Type your email"
-          />
+            <InputField
+              type="email"
+              label="Email"
+              value={email.value}
+              onChange={this.onEmailChange}
+              errors={email.errors}
+            />
+          </div>
 
-          <label>Start</label>
-          <input
-            type="date"
-            value={start.value}
-            onChange={this.handleStartChange}
-          />
+          <div className="dates">
+            <InputField
+              type="date"
+              label="Start"
+              value={start.value}
+              onChange={this.handleStartChange}
+              errors={start.errors}
+            />
 
-          <label>End</label>
-          <input
-            type="date"
-            value={end.value}
-            onChange={this.handleEndChange}
-          />
+            <InputField
+              type="date"
+              label="End"
+              value={end.value}
+              onChange={this.handleEndChange}
+              errors={end.errors}
+            />
+          </div>
 
           {userMessage && <div>{userMessage}</div>}
-          <label>Phone</label>
-          <input
-            type="text"
-            value={phone.value}
-            onChange={this.onPhoneChange}
-            placeholder="Type your phone"
+
+          <SelectField
+            label="Room Type"
+            options={roomTypes}
+            onChange={this.onRoomTypeChange}
+            errors={roomType.errors}
           />
 
-          <label>Room Type</label>
-          <select onChange={this.onRoomTypeChange}>
-            {roomTypes.map(roomType => {
-              return (
-                <option key={roomType.id} value={roomType.id}>
-                  {roomType.name}
-                </option>
-              );
-            })}
-          </select>
-
-          <label>Meal</label>
-          {meals.map(meal => (
-            <React.Fragment key={meal.id}>
-              <label>{meal.name}</label>
-              <input
-                key={meal.id}
-                type="radio"
-                value={meal.id}
-                name="radio"
-                onChange={this.onMealChange}
-              />
-            </React.Fragment>
-          ))}
-
-          <label>Guests</label>
-          <input
-            type="number"
-            value={guests.value}
-            onChange={this.onGuestsChange}
+          <RadioField
+            label="Meal"
+            options={meals}
+            onChange={this.onMealChange}
+            errors={meal.errors}
           />
 
-          <label>Notes</label>
-          <textarea
-            placeholder="White you notes here..."
-            onChange={this.handleNotesChange}
-            value={notes.value}
-          />
           <button onClick={this.handleSubmit} type="button">
             Request Booking
           </button>
