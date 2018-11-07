@@ -15,22 +15,72 @@ class Form extends React.Component {
             value: ''
           },
           roomType: {
-            value: {
-              id: '',
-              name: ''
-            }
+            value: ''
           }
         },
         errors: []
       },
-      userMessage: ''
+      userMessage: '',
+      meals: [],
+      roomTypes: []
     };
   }
+
+  componentDidMount() {
+    this.fetchMeals();
+    this.fetchRoomTypes();
+  }
+
+  fetchMeals = () => {
+    const url = 'http://localhost:8000/booking/meals/';
+    axios
+      .get(url)
+      .then(response => {
+        this.setState({meals: response.data});
+      })
+      .catch(errors =>
+        this.setState({
+          form: {
+            ...this.state.form,
+            errors
+          }
+        })
+      );
+  };
+
+  fetchRoomTypes = () => {
+    const url = 'http://localhost:8000/booking/room-types/';
+
+    axios
+      .get(url)
+      .then(response => {
+        this.setState({roomTypes: response.data});
+      })
+      .catch(errors => {
+        this.setState({
+          form: {
+            ...this.state.form,
+            errors
+          }
+        });
+      });
+  };
 
   post = ({url, payload}) => axios.post(url, payload);
 
   handleNameChange = event => {
-    this.setState({name: event.target.value});
+    this.setState({
+      form: {
+        ...this.state.form,
+        fields: {
+          ...this.state.fields,
+          name: {
+            ...this.state.fields.name,
+            value: event.target.value
+          }
+        }
+      }
+    });
   };
 
   onEmailChange = event => {
@@ -66,6 +116,7 @@ class Form extends React.Component {
         fields: {
           ...this.state.form.fields,
           phone: {
+            ...this.state.form.fields.phone,
             value: event.target.value
           }
         }
@@ -75,9 +126,7 @@ class Form extends React.Component {
   onMealChange = event => {
     const mealId = event.target.value;
 
-    const {meals, form} = this.state;
-
-    const mealOption = meals.filter(meal => meal.id === mealId);
+    const {form} = this.state;
 
     this.setState({
       form: {
@@ -86,7 +135,26 @@ class Form extends React.Component {
           ...form.fields,
           meal: {
             ...form.fields.meal,
-            value: mealOption[0]
+            value: mealId
+          }
+        }
+      }
+    });
+  };
+
+  onRoomTypeChange = event => {
+    const roomTypeId = event.target.value;
+
+    const {form} = this.state;
+
+    this.setState({
+      form: {
+        ...form,
+        fields: {
+          ...form.fields,
+          roomType: {
+            ...form.fields.roomType,
+            value: roomTypeId
           }
         }
       }
@@ -97,13 +165,12 @@ class Form extends React.Component {
 
   render() {
     const {
-      name,
-      email,
       userMessage,
       form: {
-        fields: {meal, roomType}
+        fields: {name}
       },
-      meals
+      meals,
+      roomTypes
     } = this.state;
 
     return (
@@ -111,7 +178,7 @@ class Form extends React.Component {
         <label>Name</label>
         <input
           type="text"
-          value={name}
+          value={name.value}
           onChange={this.handleNameChange}
           placeholder="Type your name"
         />
@@ -135,12 +202,22 @@ class Form extends React.Component {
         <label>Meal</label>
         <select onChange={this.onMealChange}>
           {meals &&
-            meals.map(meal => <option value={meal.id}>{meal.name}</option>)}
+            meals.map(meal => (
+              <option key={meal.id} value={meal.id}>
+                {meal.name}
+              </option>
+            ))}
         </select>
 
         <label>Room Type</label>
         <select onChange={this.onRoomTypeChange}>
-          <option value={roomType.id}>{roomType.name}</option>
+          {roomTypes.map(roomType => {
+            return (
+              <option key={roomType.id} value={roomType.id}>
+                {roomType.name}
+              </option>
+            );
+          })}
         </select>
 
         <button onClick={this.handleSubmit}>Request Booking</button>
