@@ -194,29 +194,38 @@ class Form extends React.Component {
     } = this.state;
 
     let newFields = {};
-
-    _.mapKeys(responseData, (error, key) => {
-      newFields[key] = {
-        ...fields[key],
-        errors: error
-      };
-    });
-
-    this.setState({
-      form: {
-        ...this.state.form,
-        fields: {
-          ...this.state.form.fields,
-          ...newFields
+    if (_.isArray(responseData)) {
+      this.setState({
+        form: {
+          ...this.state.form,
+          errors: responseData
         }
-      }
-    });
+      });
+    } else {
+      _.mapKeys(responseData, (error, key) => {
+        newFields[key] = {
+          ...fields[key],
+          errors: error
+        };
+      });
+
+      this.setState({
+        form: {
+          ...this.state.form,
+          fields: {
+            ...this.state.form.fields,
+            ...newFields
+          }
+        }
+      });
+    }
   };
 
   handleSubmit = () => {
     const {
       form: {
-        fields: {name, meal, email, roomType, start, end}
+        fields: {name, meal, email, roomType, start, end},
+        errors
       }
     } = this.state;
 
@@ -280,7 +289,8 @@ class Form extends React.Component {
     const {
       userMessage,
       form: {
-        fields: {name, email, start, end, roomType, meal}
+        fields: {name, email, start, end, roomType, meal},
+        errors
       },
       meals,
       roomTypes,
@@ -290,6 +300,9 @@ class Form extends React.Component {
     return (
       <React.Fragment>
         <form className="BookingRequestForm">
+          {errors.map(error => (
+            <div>{error}</div>
+          ))}
           <div className="nameAndEmail">
             <InputField
               type="text"
