@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.7);
+  background: #0c0b0bb3;
   padding: 40px;
   border-radius: 6px;
   width: 450px;
@@ -23,15 +23,17 @@
 .BookingRequestForm button {
   color: #fff;
   background-color: #f23e3e;
-  font-weight: 400;
   height: 40px;
   font-size: 14px;
   border: none;
   width: 100%;
   border-radius: 40px;
   text-transform: uppercase;
-  -webkit-transition: 0.2s all;
-  transition: 0.2s all;
+  cursor: pointer;
+}
+.BookingRequestForm button:hover,
+.BookingRequestForm button:focus {
+  opacity: 0.9;
 }
 
 .BookingRequestForm .InputField input {
@@ -41,16 +43,10 @@
   border: none;
   font-size: 16px;
   font-weight: 400;
-  -webkit-box-shadow: none;
   box-shadow: none;
   border-radius: 40px;
   padding: 0px 25px;
   width: 150px;
-}
-
-.BookingRequestForm button:hover,
-.BookingRequestForm button:focus {
-  opacity: 0.9;
 }
 
 .BookingRequestForm .dates {
@@ -81,7 +77,6 @@
   border: none;
   font-size: 16px;
   font-weight: 400;
-  -webkit-box-shadow: none;
   box-shadow: none;
   border-radius: 40px;
   padding: 0px 25px;
@@ -101,4 +96,3 @@
 .BookingRequestForm .RadioField .options > div label {
   margin-bottom: 0;
 }
-

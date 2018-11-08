@@ -11,33 +11,38 @@ class Form extends React.Component {
   constructor(props) {
     super(props);
 
+    const initialFields = {
+      name: {
+        value: '',
+        errors: []
+      },
+      email: {
+        value: '',
+        errors: []
+      },
+      meal: {
+        value: '',
+        errors: []
+      },
+      start: {
+        value: '',
+        errors: []
+      },
+      end: {
+        value: '',
+        errors: []
+      },
+      roomType: {
+        value: '',
+        errors: []
+      }
+    };
+
     this.state = {
+      initialFields,
       form: {
         fields: {
-          name: {
-            value: '',
-            errors: []
-          },
-          email: {
-            value: '',
-            errors: []
-          },
-          meal: {
-            value: '',
-            errors: []
-          },
-          start: {
-            value: '',
-            errors: []
-          },
-          end: {
-            value: '',
-            errors: []
-          },
-          roomType: {
-            value: '',
-            errors: []
-          }
+          ...initialFields
         },
         errors: []
       },
@@ -105,49 +110,49 @@ class Form extends React.Component {
     });
   };
 
-  // onEmailChange = event => {
-  //   const emailValue = event.target.value;
-
-  //   const url = `http://localhost:8000/booking/email-exist/`;
-  //   const payload = {
-  //     email: emailValue
-  //   };
-
-  //   this.post({url, payload})
-  //     .then(response => {
-  //       const message = response.data.message;
-
-  //       this.setState({userMessage: message});
-  //     })
-  //     .catch(errors => {
-  //       const error = errors[0];
-
-  //       this.setState({
-  //         form: {
-  //           ...this.state.form,
-  //           errors: error
-  //         }
-  //       });
-  //     });
-  // };
-
   onEmailChange = event => {
     const emailValue = event.target.value;
-    const {form} = this.state;
 
-    this.setState({
-      form: {
-        ...form,
-        fields: {
-          ...form.fields,
-          email: {
-            ...form.fields.email,
-            value: emailValue
+    const url = `http://localhost:8000/booking/email-exist/`;
+    const payload = {
+      email: emailValue
+    };
+
+    this.post({url, payload})
+      .then(response => {
+        const message = response.data.message;
+
+        this.setState({userMessage: message});
+      })
+      .catch(errors => {
+        const error = errors[0];
+
+        this.setState({
+          form: {
+            ...this.state.form,
+            errors: error
           }
-        }
-      }
-    });
+        });
+      });
   };
+
+  // onEmailChange = event => {
+  //   const emailValue = event.target.value;
+  //   const {form} = this.state;
+
+  //   this.setState({
+  //     form: {
+  //       ...form,
+  //       fields: {
+  //         ...form.fields,
+  //         email: {
+  //           ...form.fields.email,
+  //           value: emailValue
+  //         }
+  //       }
+  //     }
+  //   });
+  // };
 
   onMealChange = event => {
     const mealId = event.target.value;
@@ -193,7 +198,6 @@ class Form extends React.Component {
       form: {fields}
     } = this.state;
 
-    let newFields = {};
     if (_.isArray(responseData)) {
       this.setState({
         form: {
@@ -202,6 +206,7 @@ class Form extends React.Component {
         }
       });
     } else {
+      let newFields = {};
       _.mapKeys(responseData, (error, key) => {
         newFields[key] = {
           ...fields[key],
@@ -224,8 +229,7 @@ class Form extends React.Component {
   handleSubmit = () => {
     const {
       form: {
-        fields: {name, meal, email, roomType, start, end},
-        errors
+        fields: {name, meal, email, roomType, start, end}
       }
     } = this.state;
 
@@ -285,6 +289,15 @@ class Form extends React.Component {
     });
   };
 
+  handleClear = () => {
+    this.setState({
+      form: {
+        ...this.state.form,
+        fields: this.state.initialFields
+      }
+    });
+  };
+
   render() {
     const {
       userMessage,
@@ -296,13 +309,10 @@ class Form extends React.Component {
       roomTypes,
       successMessage
     } = this.state;
-
     return (
       <React.Fragment>
         <form className="BookingRequestForm">
-          {errors.map(error => (
-            <div>{error}</div>
-          ))}
+          {!_.isEmpty(errors) && errors.map(error => <div>{error}</div>)}
           <div className="nameAndEmail">
             <InputField
               type="text"
@@ -315,7 +325,6 @@ class Form extends React.Component {
             <InputField
               type="email"
               label="Email"
-              value={email.value}
               onChange={this.onEmailChange}
               errors={email.errors}
             />
@@ -357,6 +366,10 @@ class Form extends React.Component {
 
           <button onClick={this.handleSubmit} type="button">
             Request Booking
+          </button>
+
+          <button onClick={this.handleClear} type="button">
+            Clear
           </button>
         </form>
 
