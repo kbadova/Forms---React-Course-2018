@@ -194,10 +194,6 @@ class Form extends React.Component {
   handleErrors = errors => {
     const responseData = errors.response.data;
 
-    let {
-      form: {fields}
-    } = this.state;
-
     if (_.isArray(responseData)) {
       this.setState({
         form: {
@@ -206,23 +202,24 @@ class Form extends React.Component {
         }
       });
     } else {
-      let newFields = {};
-      _.mapKeys(responseData, (error, key) => {
-        newFields[key] = {
-          ...fields[key],
-          errors: error
-        };
-      });
+      this.setFieldErrors(responseData);
+      // let newFields = {};
+      // _.mapKeys(responseData, (error, key) => {
+      //   newFields[key] = {
+      //     ...fields[key],
+      //     errors: error
+      //   };
+      // });
 
-      this.setState({
-        form: {
-          ...this.state.form,
-          fields: {
-            ...this.state.form.fields,
-            ...newFields
-          }
-        }
-      });
+      // this.setState({
+      //   form: {
+      //     ...this.state.form,
+      //     fields: {
+      //       ...this.state.form.fields,
+      //       ...newFields
+      //     }
+      //   }
+      // });
     }
   };
 
@@ -255,38 +252,14 @@ class Form extends React.Component {
 
   handleStartChange = event => {
     const start = event.target.value;
-    const {form} = this.state;
 
-    this.setState({
-      form: {
-        ...form,
-        fields: {
-          ...form.fields,
-          start: {
-            ...form.fields.start,
-            value: start
-          }
-        }
-      }
-    });
+    this.updateState('form.fields.start.value', start);
   };
 
   handleEndChange = event => {
     const end = event.target.value;
-    const {form} = this.state;
 
-    this.setState({
-      form: {
-        ...form,
-        fields: {
-          ...form.fields,
-          end: {
-            ...form.fields.end,
-            value: end
-          }
-        }
-      }
-    });
+    this.updateState('form.fields.end.value', end);
   };
 
   handleClear = () => {
@@ -296,6 +269,24 @@ class Form extends React.Component {
         fields: this.state.initialFields
       }
     });
+  };
+
+  updateState = (path, value) => {
+    const newState = _.cloneDeep(this.state);
+    const stateWithChangedField = _.set(newState, path, value);
+
+    this.setState(stateWithChangedField);
+  };
+
+  getFieldValue = path => _.get(this.state, path);
+
+  setFieldErrors = responseData => {
+    let form = _.cloneDeep(this.state.form);
+    _.forEach(responseData, (value, key) => {
+      _.set(form, `fields.${key}.errors`, value);
+    });
+
+    this.setState({form});
   };
 
   render() {
