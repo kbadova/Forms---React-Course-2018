@@ -35,6 +35,10 @@ class Form extends React.Component {
       roomType: {
         value: '',
         errors: []
+      },
+      phone: {
+        value: '',
+        errors: []
       }
     };
 
@@ -289,11 +293,27 @@ class Form extends React.Component {
     this.setState({form});
   };
 
+  handlePhoneChange = event => {
+    this.updateState('form.fields.phone.value', event.target.value);
+  };
+
+  validatePhone = value => {
+    const regex = /^\d{3}-\d{3}-\d{4}$/;
+
+    const matchRegEx = value.match(regex);
+
+    return matchRegEx;
+  };
+
+  updateSyncErrors = (fieldName, errorMsg) => {
+    this.updateState(`form.fields.${fieldName}.errors`, errorMsg);
+  };
+
   render() {
     const {
       userMessage,
       form: {
-        fields: {name, email, start, end, roomType, meal},
+        fields: {name, email, start, end, roomType, meal, phone},
         errors
       },
       meals,
@@ -353,6 +373,16 @@ class Form extends React.Component {
             options={meals}
             onChange={this.onMealChange}
             errors={meal.errors}
+          />
+
+          <InputField
+            type="text"
+            label="Phone number"
+            value={phone.value}
+            onChange={this.handlePhoneChange}
+            errors={phone.errors}
+            validator={this.validatePhone}
+            updateSyncErrors={this.updateSyncErrors}
           />
 
           <button onClick={this.handleSubmit} type="button">

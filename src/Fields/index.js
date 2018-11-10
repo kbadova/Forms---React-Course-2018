@@ -1,18 +1,40 @@
 import React from 'react';
+import _ from 'lodash';
 
-const InputField = ({type, value, onChange, label, errors}) => (
-  <div className="InputField">
-    <label>{label}</label>
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder="Type your name"
-    />
+const InputField = ({
+  type,
+  value,
+  onChange,
+  label,
+  errors,
+  validator,
+  updateSyncErrors
+}) => {
+  const onFieldChange = event => {
+    onChange(event);
+    const macthValidator = validator(event.target.value);
 
-    {errors && <div>{errors}</div>}
-  </div>
-);
+    if (_.isNil(macthValidator)) {
+      updateSyncErrors('phone', ['Enter a valid phone number']);
+    } else {
+      updateSyncErrors('phone', []);
+    }
+  };
+
+  return (
+    <div className="InputField">
+      <label>{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={onFieldChange}
+        placeholder="Type your name"
+      />
+
+      {errors && <div>{errors}</div>}
+    </div>
+  );
+};
 
 const RadioField = ({value, label, onChange, options}) => (
   <div className="RadioField">
