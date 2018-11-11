@@ -39,6 +39,10 @@ class Form extends React.Component {
       phone: {
         value: '',
         errors: []
+      },
+      room: {
+        value: '',
+        errors: []
       }
     };
 
@@ -53,7 +57,8 @@ class Form extends React.Component {
       userMessage: '',
       meals: [],
       roomTypes: [],
-      successMessage: ''
+      successMessage: '',
+      rooms: []
     };
   }
 
@@ -79,6 +84,13 @@ class Form extends React.Component {
       );
   };
 
+  fetchAvailableRooms = roomType => {
+    const url = `http://localhost:8000/booking/available-rooms/${roomType}/`;
+    axios.get(url).then(response => {
+      this.setState({rooms: response.data});
+    });
+  };
+
   fetchRoomTypes = () => {
     const url = 'http://localhost:8000/booking/room-types/';
 
@@ -86,6 +98,7 @@ class Form extends React.Component {
       .get(url)
       .then(response => {
         this.setState({roomTypes: response.data});
+        this.fetchAvailableRooms(response.data[0].id);
       })
       .catch(errors => {
         this.setState({
@@ -184,6 +197,8 @@ class Form extends React.Component {
     if (roomTypeId === '3') {
       this.updateState('form.fields.meal.value', 3);
     }
+
+    this.fetchAvailableRooms(roomTypeId);
   };
 
   handleErrors = errors => {
@@ -221,7 +236,7 @@ class Form extends React.Component {
   handleSubmit = () => {
     const {
       form: {
-        fields: {name, meal, email, roomType, start, end, phone}
+        fields: {name, meal, email, roomType, start, end, phone, room}
       }
     } = this.state;
 
@@ -232,7 +247,8 @@ class Form extends React.Component {
       roomType: roomType.value,
       start: start.value,
       end: end.value,
-      phone: phone.value
+      phone: phone.value,
+      room: room.value
     };
 
     const url = 'http://localhost:8000/booking/booking-request/';
@@ -329,13 +345,18 @@ class Form extends React.Component {
     this.updateState('form.fields.meal.value', event.target.value);
   };
 
+  onRoomChange = event => {
+    this.updateState('form.fields.room.value', event.target.value);
+  };
+
   render() {
     const {
       userMessage,
       form: {
-        fields: {name, email, start, end, roomType, meal, phone},
+        fields: {name, email, start, end, roomType, meal, phone, room},
         errors
       },
+      rooms,
       meals,
       roomTypes,
       successMessage
@@ -395,6 +416,14 @@ class Form extends React.Component {
             options={meals}
             onChange={this.onMealChange}
             errors={meal.errors}
+          />
+
+          <SelectField
+            label="Rooms"
+            value={room.value}
+            options={rooms}
+            onChange={this.onRoomChange}
+            errors={room.errors}
           />
 
           <InputField
