@@ -59,7 +59,7 @@ const RadioField = ({value, label, onChange, options}) => (
 const SelectField = ({label, value, onChange, options}) => (
   <div className="SelectField">
     <label>{label}</label>
-    <select onChange={onChange}>
+    <select onChange={onChange} value={value}>
       {options.map(option => {
         return (
           <option key={option.id} value={option.id}>

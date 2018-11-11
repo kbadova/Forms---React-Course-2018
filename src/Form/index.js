@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React from 'react';
 import axios from 'axios';
 
-import {InputField, RadioField, SelectField} from '../Fields';
+import {InputField, SelectField} from '../Fields';
 
 import './styles.css';
 
@@ -179,20 +179,11 @@ class Form extends React.Component {
   onRoomTypeChange = event => {
     const roomTypeId = event.target.value;
 
-    const {form} = this.state;
+    this.updateState('form.fields.roomType.value', roomTypeId);
 
-    this.setState({
-      form: {
-        ...form,
-        fields: {
-          ...form.fields,
-          roomType: {
-            ...form.fields.roomType,
-            value: roomTypeId
-          }
-        }
-      }
-    });
+    if (roomTypeId === '3') {
+      this.updateState('form.fields.meal.value', 3);
+    }
   };
 
   handleErrors = errors => {
@@ -302,11 +293,26 @@ class Form extends React.Component {
 
     const matchRegEx = value.match(regex);
 
-    return matchRegEx;
+    return matchRegEx ? undefined : 'Enter a valid number';
   };
 
   updateSyncErrors = (fieldName, errorMsg) => {
     this.updateState(`form.fields.${fieldName}.errors`, errorMsg);
+  };
+
+  updateMeal = roomTypeValue => {
+    const {form} = this.state;
+    if (roomTypeValue === '3') {
+      this.setState({
+        form: {
+          ...form
+        }
+      });
+    }
+  };
+
+  onMealChange = event => {
+    this.updateState('form.fields.meal.value', event.target.value);
   };
 
   render() {
@@ -368,8 +374,9 @@ class Form extends React.Component {
             errors={roomType.errors}
           />
 
-          <RadioField
-            label="Meal"
+          <SelectField
+            label="Meals"
+            value={meal.value}
             options={meals}
             onChange={this.onMealChange}
             errors={meal.errors}
