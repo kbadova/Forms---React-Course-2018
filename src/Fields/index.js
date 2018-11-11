@@ -12,7 +12,6 @@ const InputField = ({
 }) => {
   const onFieldChange = event => {
     onChange(event);
-
     let errors = [];
 
     _.forEach(validators, validator => {
@@ -23,7 +22,7 @@ const InputField = ({
       }
     });
 
-    updateSyncErrors('phone', errors);
+    // updateSyncErrors('phone', errors);
   };
 
   return (

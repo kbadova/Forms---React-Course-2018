@@ -221,7 +221,7 @@ class Form extends React.Component {
   handleSubmit = () => {
     const {
       form: {
-        fields: {name, meal, email, roomType, start, end}
+        fields: {name, meal, email, roomType, start, end, phone}
       }
     } = this.state;
 
@@ -231,7 +231,8 @@ class Form extends React.Component {
       meal: meal.value,
       roomType: roomType.value,
       start: start.value,
-      end: end.value
+      end: end.value,
+      phone: phone.value
     };
 
     const url = 'http://localhost:8000/booking/booking-request/';
@@ -269,7 +270,7 @@ class Form extends React.Component {
   updateState = (path, value) => {
     const newState = _.cloneDeep(this.state);
     const stateWithChangedField = _.set(newState, path, value);
-    console.log(stateWithChangedField);
+
     this.setState(stateWithChangedField);
   };
 
@@ -284,8 +285,21 @@ class Form extends React.Component {
     this.setState({form});
   };
 
+  checkPhoneNumberIsTaken = phone => {
+    const url = 'http://localhost:8000/booking/check-phone/';
+    axios
+      .post(url, {phone})
+      .then(() => {
+        this.updateState('form.fields.phone.errors', []);
+      })
+      .catch(errors => {
+        this.updateState('form.fields.phone.errors', errors.response.data);
+      });
+  };
   handlePhoneChange = event => {
     this.updateState('form.fields.phone.value', event.target.value);
+
+    this.checkPhoneNumberIsTaken(event.target.value);
   };
 
   validatePhone = value => {
