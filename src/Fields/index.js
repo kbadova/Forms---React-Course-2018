@@ -7,18 +7,23 @@ const InputField = ({
   onChange,
   label,
   errors,
-  validator,
+  validators,
   updateSyncErrors
 }) => {
   const onFieldChange = event => {
     onChange(event);
-    const macthValidator = validator(event.target.value);
 
-    if (_.isNil(macthValidator)) {
-      updateSyncErrors('phone', ['Enter a valid phone number']);
-    } else {
-      updateSyncErrors('phone', []);
-    }
+    let errors = [];
+
+    _.forEach(validators, validator => {
+      const syncErrors = validator(event.target.value);
+
+      if (syncErrors) {
+        errors.push(syncErrors);
+      }
+    });
+
+    updateSyncErrors('phone', errors);
   };
 
   return (

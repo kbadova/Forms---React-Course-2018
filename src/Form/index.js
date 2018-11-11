@@ -269,7 +269,7 @@ class Form extends React.Component {
   updateState = (path, value) => {
     const newState = _.cloneDeep(this.state);
     const stateWithChangedField = _.set(newState, path, value);
-
+    console.log(stateWithChangedField);
     this.setState(stateWithChangedField);
   };
 
@@ -326,6 +326,7 @@ class Form extends React.Component {
       roomTypes,
       successMessage
     } = this.state;
+
     return (
       <React.Fragment>
         <form className="BookingRequestForm">
@@ -388,7 +389,7 @@ class Form extends React.Component {
             value={phone.value}
             onChange={this.handlePhoneChange}
             errors={phone.errors}
-            validator={this.validatePhone}
+            validators={[this.validatePhone]}
             updateSyncErrors={this.updateSyncErrors}
           />
 
