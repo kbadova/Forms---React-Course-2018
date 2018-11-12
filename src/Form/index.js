@@ -98,6 +98,7 @@ class Form extends React.Component {
       .get(url)
       .then(response => {
         this.setState({roomTypes: response.data});
+
         this.fetchAvailableRooms(response.data[0].id);
       })
       .catch(errors => {
@@ -126,56 +127,55 @@ class Form extends React.Component {
       });
   };
 
-  handleNameChange = event => {
-    const name = event.target.value;
-    this.updateState('form.fields.name.value', name);
+  handleNameChange = (name, errors) => {
+    this.updateState('form.fields.name', {value: name, errors: errors});
 
     this.checkEmailExistsPerName(name);
   };
 
-  onEmailChange = event => {
-    const emailValue = event.target.value;
-
-    const url = `http://localhost:8000/booking/email-exist/`;
-    const payload = {
-      email: emailValue
-    };
-
-    this.post({url, payload})
-      .then(response => {
-        const message = response.data.message;
-
-        this.setState({userMessage: message});
-      })
-      .catch(errors => {
-        const error = errors[0];
-
-        this.setState({
-          form: {
-            ...this.state.form,
-            errors: error
-          }
-        });
-      });
-  };
-
   // onEmailChange = event => {
   //   const emailValue = event.target.value;
-  //   const {form} = this.state;
 
-  //   this.setState({
-  //     form: {
-  //       ...form,
-  //       fields: {
-  //         ...form.fields,
-  //         email: {
-  //           ...form.fields.email,
-  //           value: emailValue
+  //   const url = `http://localhost:8000/booking/email-exist/`;
+  //   const payload = {
+  //     email: emailValue
+  //   };
+
+  //   this.post({url, payload})
+  //     .then(response => {
+  //       const message = response.data.message;
+
+  //       this.setState({userMessage: message});
+  //     })
+  //     .catch(errors => {
+  //       const error = errors[0];
+
+  //       this.setState({
+  //         form: {
+  //           ...this.state.form,
+  //           errors: error
   //         }
-  //       }
-  //     }
-  //   });
+  //       });
+  //     });
   // };
+
+  onEmailChange = event => {
+    const emailValue = event.target.value;
+    const {form} = this.state;
+
+    this.setState({
+      form: {
+        ...form,
+        fields: {
+          ...form.fields,
+          email: {
+            ...form.fields.email,
+            value: emailValue
+          }
+        }
+      }
+    });
+  };
 
   onMealChange = event => {
     const mealId = event.target.value;
@@ -219,23 +219,6 @@ class Form extends React.Component {
       });
     } else {
       this.setFieldErrors(responseData);
-      // let newFields = {};
-      // _.mapKeys(responseData, (error, key) => {
-      //   newFields[key] = {
-      //     ...fields[key],
-      //     errors: error
-      //   };
-      // });
-
-      // this.setState({
-      //   form: {
-      //     ...this.state.form,
-      //     fields: {
-      //       ...this.state.form.fields,
-      //       ...newFields
-      //     }
-      //   }
-      // });
     }
   };
 
@@ -290,21 +273,25 @@ class Form extends React.Component {
   };
 
   updateState = (path, value) => {
-    const newState = _.cloneDeep(this.state.form);
-    const stateWithChangedField = _.set(newState, path, value);
+    this.setState(state => {
+      const newState = _.cloneDeep(state);
+      const stateWithChangedField = _.set(newState, path, value);
 
-    this.setState(stateWithChangedField);
+      return stateWithChangedField;
+    });
   };
 
   getFieldValue = path => _.get(this.state, path);
 
   setFieldErrors = responseData => {
-    let form = _.cloneDeep(this.state.form);
-    _.forEach(responseData, (value, key) => {
-      _.set(form, `fields.${key}.errors`, value);
-    });
+    this.setState(state => {
+      let form = _.cloneDeep(this.state.form);
+      _.forEach(responseData, (value, key) => {
+        _.set(form, `fields.${key}.errors`, value);
+      });
 
-    this.setState({form});
+      return {form};
+    });
   };
 
   checkPhoneNumberIsTaken = phone => {
@@ -318,10 +305,11 @@ class Form extends React.Component {
         this.updateState('form.fields.phone.errors', errors.response.data);
       });
   };
+
   handlePhoneChange = event => {
     this.updateState('form.fields.phone.value', event.target.value);
 
-    this.checkPhoneNumberIsTaken(event.target.value);
+    // this.checkPhoneNumberIsTaken(event.target.value);
   };
 
   validatePhone = value => {
@@ -356,7 +344,7 @@ class Form extends React.Component {
   };
 
   validateName = name => {
-    return name.length > 20
+    return name.lenght() > 20
       ? 'Name cannot be more than 20 characters'
       : undefined;
   };
@@ -385,8 +373,8 @@ class Form extends React.Component {
               value={name.value}
               onChange={this.handleNameChange}
               errors={name.errors}
-              validators={[this.validateName]}
               name="name"
+              validators={[this.validateName]}
               updateSyncErrors={this.updateSyncErrors}
             />
 

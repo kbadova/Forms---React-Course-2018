@@ -8,11 +8,12 @@ const InputField = ({
   label,
   errors,
   validators,
-  updateSyncErrors,
-  name
+  name,
+  updateSyncErrors
 }) => {
   const onFieldChange = event => {
-    onChange(event);
+    onChange(event.target.value);
+
     let errors = [];
 
     _.forEach(validators, validator => {
@@ -22,7 +23,6 @@ const InputField = ({
         errors.push(syncErrors);
       }
     });
-
     updateSyncErrors(name, errors);
   };
 
