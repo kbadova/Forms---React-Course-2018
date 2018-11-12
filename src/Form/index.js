@@ -113,7 +113,8 @@ class Form extends React.Component {
 
   post = ({url, payload}) => axios.post(url, payload);
 
-  checkEmailExistsPerName = name => {
+  checkEmailExistsPerName = () => {
+    const name = this.getFieldValue('form.fields.name.value');
     axios
       .post('http://localhost:8000/booking/email-exist-per-name/', {name})
       .then(response => {
@@ -130,7 +131,8 @@ class Form extends React.Component {
   handleNameChange = (name, errors) => {
     this.updateState('form.fields.name', {value: name, errors: errors});
 
-    this.checkEmailExistsPerName(name);
+    _.debounce(this.checkEmailExistsPerName, 500)();
+    // this.checkEmailExistsPerName(name);
   };
 
   // onEmailChange = event => {
@@ -344,7 +346,7 @@ class Form extends React.Component {
   };
 
   validateName = name => {
-    return name.lenght() > 20
+    return name.lenght > 20
       ? 'Name cannot be more than 20 characters'
       : undefined;
   };
