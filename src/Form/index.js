@@ -112,19 +112,25 @@ class Form extends React.Component {
 
   post = ({url, payload}) => axios.post(url, payload);
 
-  handleNameChange = event => {
-    this.setState({
-      form: {
-        ...this.state.form,
-        fields: {
-          ...this.state.form.fields,
-          name: {
-            ...this.state.form.fields.name,
-            value: event.target.value
-          }
+  checkEmailExistsPerName = name => {
+    axios
+      .post('http://localhost:8000/booking/email-exist-per-name/', {name})
+      .then(response => {
+        const users = response.data;
+        if (!_.isEmpty(users)) {
+          const user = users[0];
+          this.updateState('form.fields.email.value', user.email);
+        } else {
+          this.updateState('form.fields.email.value', '');
         }
-      }
-    });
+      });
+  };
+
+  handleNameChange = event => {
+    const name = event.target.value;
+    this.updateState('form.fields.name.value', name);
+
+    this.checkEmailExistsPerName(name);
   };
 
   onEmailChange = event => {
@@ -284,7 +290,7 @@ class Form extends React.Component {
   };
 
   updateState = (path, value) => {
-    const newState = _.cloneDeep(this.state);
+    const newState = _.cloneDeep(this.state.form);
     const stateWithChangedField = _.set(newState, path, value);
 
     this.setState(stateWithChangedField);
@@ -349,6 +355,12 @@ class Form extends React.Component {
     this.updateState('form.fields.room.value', event.target.value);
   };
 
+  validateName = name => {
+    return name.length > 20
+      ? 'Name cannot be more than 20 characters'
+      : undefined;
+  };
+
   render() {
     const {
       userMessage,
@@ -373,11 +385,15 @@ class Form extends React.Component {
               value={name.value}
               onChange={this.handleNameChange}
               errors={name.errors}
+              validators={[this.validateName]}
+              name="name"
+              updateSyncErrors={this.updateSyncErrors}
             />
 
             <InputField
               type="email"
               label="Email"
+              value={email.value}
               onChange={this.onEmailChange}
               errors={email.errors}
             />
@@ -429,6 +445,7 @@ class Form extends React.Component {
           <InputField
             type="text"
             label="Phone number"
+            name="phone"
             value={phone.value}
             onChange={this.handlePhoneChange}
             errors={phone.errors}

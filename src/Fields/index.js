@@ -8,7 +8,8 @@ const InputField = ({
   label,
   errors,
   validators,
-  updateSyncErrors
+  updateSyncErrors,
+  name
 }) => {
   const onFieldChange = event => {
     onChange(event);
@@ -22,7 +23,7 @@ const InputField = ({
       }
     });
 
-    // updateSyncErrors('phone', errors);
+    updateSyncErrors(name, errors);
   };
 
   return (
