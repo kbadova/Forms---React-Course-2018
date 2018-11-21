@@ -96,3 +96,20 @@
 .BookingRequestForm .RadioField .options > div label {
   margin-bottom: 0;
 }
+
+.BookingRequestForm .formButton {
+  margin-top: 2rem;
+}
+
+.BookingRequestForm .errors {
+  background-color: #782c3b;
+  height: auto;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 400;
+  box-shadow: none;
+  border-radius: 40px;
+  padding: 5px 25px;
+  width: 150px;
+}

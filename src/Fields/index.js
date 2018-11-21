@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import classNames from 'classnames';
 
 const InputField = ({
   type,
@@ -12,18 +13,16 @@ const InputField = ({
   updateSyncErrors
 }) => {
   const onFieldChange = event => {
-    onChange(event.target.value);
+    onChange(event);
 
-    let errors = [];
+    if (validators) {
+      const errors = validators
+        .map(validator => validator(event.target.value))
+        .filter(validation => !validation.valid)
+        .map(asd => asd.message);
 
-    _.forEach(validators, validator => {
-      const syncErrors = validator(event.target.value);
-
-      if (syncErrors) {
-        errors.push(syncErrors);
-      }
-    });
-    updateSyncErrors(name, errors);
+      updateSyncErrors(name, errors);
+    }
   };
 
   return (
@@ -36,7 +35,9 @@ const InputField = ({
         placeholder="Type your name"
       />
 
-      {errors && <div>{errors}</div>}
+      {!_.isEmpty(errors) && (
+        <div className={classNames({errors})}>{errors}</div>
+      )}
     </div>
   );
 };

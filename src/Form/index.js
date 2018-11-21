@@ -58,7 +58,8 @@ class Form extends React.Component {
       meals: [],
       roomTypes: [],
       successMessage: '',
-      rooms: []
+      rooms: [],
+      number: 0
     };
   }
 
@@ -131,8 +132,10 @@ class Form extends React.Component {
   handleNameChange = (name, errors) => {
     this.updateState('form.fields.name', {value: name, errors: errors});
 
+    this.updateState('form.fields.name', {value: name, errors: []});
+
     _.debounce(this.checkEmailExistsPerName, 500)();
-    // this.checkEmailExistsPerName(name);
+    this.checkEmailExistsPerName(name);
   };
 
   // onEmailChange = event => {
@@ -276,12 +279,38 @@ class Form extends React.Component {
 
   updateState = (path, value) => {
     this.setState(state => {
-      const newState = _.cloneDeep(state);
-      const stateWithChangedField = _.set(newState, path, value);
+      // const newState = _.cloneDeep(state);
+      // let stateWithChangedField = _.set(newState, path, value);
+
+      console.log(state);
+      let stateWithChangedField = _.set(state, path, value);
+
+      if (state.form.fields.name.value === '') {
+        stateWithChangedField = {
+          ...stateWithChangedField,
+          form: {
+            ...stateWithChangedField.form,
+            fields: {
+              ...stateWithChangedField.form.fields,
+              name: {
+                ...stateWithChangedField.form.fields.name
+              }
+            }
+          }
+        };
+      }
 
       return stateWithChangedField;
     });
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevState.form.fields.name.value !== this.state.form.fields.name.value
+    ) {
+      console.log('Component updated');
+    }
+  }
 
   getFieldValue = path => _.get(this.state, path);
 
@@ -311,18 +340,20 @@ class Form extends React.Component {
   handlePhoneChange = event => {
     this.updateState('form.fields.phone.value', event.target.value);
 
-    // this.checkPhoneNumberIsTaken(event.target.value);
+    this.checkPhoneNumberIsTaken(event.target.value);
   };
 
   validatePhone = value => {
     const regex = /^\d{3}-\d{3}-\d{4}$/;
 
-    const matchRegEx = value.match(regex);
-
-    return matchRegEx ? undefined : 'Enter a valid number';
+    return {
+      valid: value.match(regex),
+      message: 'Enter a valid number'
+    };
   };
 
   updateSyncErrors = (fieldName, errorMsg) => {
+    console.log(fieldName, errorMsg);
     this.updateState(`form.fields.${fieldName}.errors`, errorMsg);
   };
 
@@ -346,9 +377,10 @@ class Form extends React.Component {
   };
 
   validateName = name => {
-    return name.lenght > 20
-      ? 'Name cannot be more than 20 characters'
-      : undefined;
+    return {
+      valid: name.length > 20,
+      message: 'Name cannot be more than 20 characters'
+    };
   };
 
   render() {
@@ -361,7 +393,8 @@ class Form extends React.Component {
       rooms,
       meals,
       roomTypes,
-      successMessage
+      successMessage,
+      number
     } = this.state;
 
     return (
@@ -375,9 +408,6 @@ class Form extends React.Component {
               value={name.value}
               onChange={this.handleNameChange}
               errors={name.errors}
-              name="name"
-              validators={[this.validateName]}
-              updateSyncErrors={this.updateSyncErrors}
             />
 
             <InputField
@@ -388,7 +418,6 @@ class Form extends React.Component {
               errors={email.errors}
             />
           </div>
-
           <div className="dates">
             <InputField
               type="date"
@@ -406,16 +435,13 @@ class Form extends React.Component {
               errors={end.errors}
             />
           </div>
-
           {userMessage && <div>{userMessage}</div>}
-
           <SelectField
             label="Room Type"
             options={roomTypes}
             onChange={this.onRoomTypeChange}
             errors={roomType.errors}
           />
-
           <SelectField
             label="Meals"
             value={meal.value}
@@ -423,7 +449,6 @@ class Form extends React.Component {
             onChange={this.onMealChange}
             errors={meal.errors}
           />
-
           <SelectField
             label="Rooms"
             value={room.value}
@@ -431,7 +456,6 @@ class Form extends React.Component {
             onChange={this.onRoomChange}
             errors={room.errors}
           />
-
           <InputField
             type="text"
             label="Phone number"
@@ -442,16 +466,19 @@ class Form extends React.Component {
             validators={[this.validatePhone]}
             updateSyncErrors={this.updateSyncErrors}
           />
-
-          <button onClick={this.handleSubmit} type="button">
+          <button
+            className="formButton"
+            onClick={this.handleSubmit}
+            type="button">
             Request Booking
           </button>
-
-          <button onClick={this.handleClear} type="button">
+          <button
+            className="formButton"
+            onClick={this.handleClear}
+            type="button">
             Clear
           </button>
         </form>
-
         {successMessage && <div>{successMessage}</div>}
       </React.Fragment>
     );
